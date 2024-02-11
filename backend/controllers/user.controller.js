@@ -73,11 +73,11 @@ const removeUserHandler = createHandler(async (req, res) => {
 });
 
 export {
-  registerHandler as register,
-  loginHandler as login,
-  createNewUserHandler as create,
-  getAllUsersHandler as getAll,
-  getUserByIdHandler as getById,
-  updateUserHandler as update,
-  removeUserHandler as remove,
+  registerHandler as Register,
+  loginHandler as LogIn,
+  createNewUserHandler as Create,
+  getAllUsersHandler as GetAll,
+  getUserByIdHandler as GetById,
+  updateUserHandler as Update,
+  removeUserHandler as Delete,
 };

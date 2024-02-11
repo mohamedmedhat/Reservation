@@ -1,5 +1,6 @@
 import express from "express";
-import upload, {
+import {
+  upload,
   Delete,
   GetAll,
   GetById,
