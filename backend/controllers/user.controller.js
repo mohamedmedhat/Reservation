@@ -3,102 +3,81 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.js';
 
-// [post] http://localhost:PORT/users/reg
-export const Register = asyncHandler(async (req, res) => {
-  try {
-    const userData = req.body;
-    const usr = new User(userData);
+const generateAuthToken = (user) => {
+  const payload = {
+    _id: user._id,
+    email: user.email,
+    name: user.name,
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET_KEY);
+};
 
-    const salt = bcrypt.genSaltSync(10);
-    const cryptedPass = await bcrypt.hashSync(userData.password, salt);
+// Factory function for creating handlers
+const createHandler = (handler) => asyncHandler(handler);
 
-    usr.password = cryptedPass;
-    const savedUser = await usr.save();
-    res.send(savedUser);
-  } catch (err) {
-    res.status(400).send(err);
-  }
+// Handlers
+const registerHandler = createHandler(async (req, res) => {
+  const userData = req.body;
+  const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const newUser = new User({ ...userData, password: hashedPassword });
+  const savedUser = await newUser.save();
+  res.status(201).json(savedUser);
 });
 
-// [post] http://localhost:PORT/users/login
-export const LogIn = asyncHandler(async (req, res) => {
-  try {
-    const data = req.body;
-    const usr = await User.findOne({ email: data.email });
-    if (!usr) {
-      return res.status(404).send("Email or password invalid");
-    }
-
-    const validPass = bcrypt.compareSync(data.password, usr.password);
-
-    if (!validPass) {
-      return res.status(401).send("Email or password invalid");
-    }
-
-    const payload = {
-      _id: usr._id,
-      email: usr.email,
-      name: usr.name,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
-    res.status(200).send({ mytoken: token });
-  } catch (err) {
-    res.status(400).send(err);
+const loginHandler = createHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    return res.status(401).json({ message: 'Invalid email or password' });
   }
+  const token = generateAuthToken(user);
+  res.status(200).json({ token });
 });
 
-// [post] http://localhost:PORT/users/create
-export const Create = asyncHandler(async (req, res) => {
-  try {
-    const data = req.body;
-    const usr = new User(data);
-    const saveUser = await usr.save();
-    res.send(saveUser);
-  } catch (err) {
-    res.send(err);
-  }
+const createNewUserHandler = createHandler(async (req, res) => {
+  const newUser = new User(req.body);
+  const savedUser = await newUser.save();
+  res.status(201).json(savedUser);
 });
 
-// [GET] http://localhost:PORT/users/getall
-export const GetAll = asyncHandler(async (req, res) => {
-  try {
-    const users = await User.find();
-    res.send(users);
-  } catch (err) {
-    res.send(err);
-  }
+const getAllUsersHandler = createHandler(async (req, res) => {
+  const users = await User.find();
+  res.json(users);
 });
 
-// [GET] http://localhost:PORT/users/getbyid/:id
-export const GetById = asyncHandler(async (req, res) => {
-  try {
-    const myid = req.params.id;
-    const users = await User.findOne({ _id: myid });
-    res.send(users);
-  } catch (err) {
-    res.send(err);
+const getUserByIdHandler = createHandler(async (req, res) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
   }
+  res.json(user);
 });
 
-// [PUT] http://localhost:PORT/users/update/:id
-export const Update = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
-    const newData = req.body;
-    const updateUser = await User.findOneAndUpdate({ _id: id }, newData);
-    res.send(updateUser);
-  } catch (err) {
-    res.send(err);
+const updateUserHandler = createHandler(async (req, res) => {
+  const userId = req.params.id;
+  const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
+  if (!updatedUser) {
+    return res.status(404).json({ message: 'User not found' });
   }
+  res.json(updatedUser);
 });
 
-// [DELETE] http://localhost:PORT/users/delete/:id
-export const Delete = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
-    const deleteUser = await User.findOneAndDelete({ _id: id });
-    res.status(200).send(deleteUser);
-  } catch (err) {
-    res.status(404).send(err);
+const removeUserHandler = createHandler(async (req, res) => {
+  const userId = req.params.id;
+  const deletedUser = await User.findByIdAndDelete(userId);
+  if (!deletedUser) {
+    return res.status(404).json({ message: 'User not found' });
   }
+  res.json(deletedUser);
 });
+
+export {
+  registerHandler as register,
+  loginHandler as login,
+  createNewUserHandler as create,
+  getAllUsersHandler as getAll,
+  getUserByIdHandler as getById,
+  updateUserHandler as update,
+  removeUserHandler as remove,
+};
