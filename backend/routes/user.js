@@ -10,6 +10,7 @@ import {
   Delete,
   ResetPassword,
   LogOut,
+  ForgotPassword,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -49,8 +50,13 @@ router.delete("/delete/:id",  (req,res,next)=>{
   next();
 },Delete);
 
+router.post('/forgotpassword', (req,res,next)=>{
+  console.log("Received POST request [forgotpassword] from users/forgotpassword");
+  next();
+},ForgotPassword)
+
 router.post('/resetpassword/:token',(req,res,next)=>{
-  console.log("Received POST request [resetPassword] from users/resetpassword/:toekn");
+  console.log("Received POST request [resetPassword] from users/resetpassword/:token");
   next();
 },ResetPassword);
 

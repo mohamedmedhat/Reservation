@@ -10,7 +10,7 @@ const generateAuthToken = (user) => {
     email: user.email,
     name: user.name,
   };
-  return jwt.sign(payload, process.env.JWT_SECRET_KEY);
+  return jwt.sign(payload, process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
 };
 
 const sendResetPasswordEmail = async (email, token) => {
@@ -100,6 +100,25 @@ const removeUserHandler = createHandler(async (req, res) => {
   res.json(deletedUser);
 });
 
+//[POST] http://localhost:PORT/users/forgotpassword
+const forgotPasswordHandler = createHandler(async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.json({ msg: "User not found" });
+    }
+
+    const token = generateToken({ id: user._id });
+    await sendResetPasswordEmail(email, token);
+
+    return res.json({ status: true, msg: "Reset password email sent" });
+  } catch (error) {
+    next(error);
+  }
+})
+
 // [POST] http://localhost:PORT/users/resetpassword/:token
 const resetPasswordHandler = createHandler(async (req, res, next) => {
   try {
@@ -138,6 +157,7 @@ export {
   getUserByIdHandler as GetById,
   updateUserHandler as Update,
   removeUserHandler as Delete,
+  forgotPasswordHandler as ForgotPassword,
   resetPasswordHandler as ResetPassword,
-  logoutHandler as LogOut
+  logoutHandler as LogOut,
 };
