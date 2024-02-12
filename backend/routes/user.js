@@ -11,6 +11,7 @@ import {
   ResetPassword,
   LogOut,
   ForgotPassword,
+  SmsSender,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -53,7 +54,12 @@ router.delete("/delete/:id",  (req,res,next)=>{
 router.post('/forgotpassword', (req,res,next)=>{
   console.log("Received POST request [forgotpassword] from users/forgotpassword");
   next();
-},ForgotPassword)
+},ForgotPassword);
+
+router.post('/forgotpasswordassms',(req,res,next)=>{
+  console.log("Received POST request [forgotpasswordassms] from users/forgotpasswordassms");
+  next();
+},SmsSender)
 
 router.post('/resetpassword/:token',(req,res,next)=>{
   console.log("Received POST request [resetPassword] from users/resetpassword/:token");

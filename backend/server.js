@@ -33,9 +33,8 @@ app.use(cors({
   credentials: true,
 }));
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
-// app.use("/images", express.static(path.join(__dirname, "uploads")));
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")))
 
 

@@ -2,6 +2,8 @@ import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
+import twilio from 'twilio';
+import { Server } from 'socket.io';
 import User from '../models/user.js';
 
 const generateAuthToken = (user) => {
@@ -119,6 +121,41 @@ const forgotPasswordHandler = createHandler(async (req, res, next) => {
   }
 })
 
+// [POST] http://localhost:PORT/users/forgotpasswordassms
+const smsSenderHandler = createHandler(async (req, res, next) => {
+  const { phoneNumber, email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  if (user.phoneNumber !== phoneNumber) {
+    return res.status(400).json({ message: 'Provided phone number does not match the user record' });
+  }
+
+  try {
+    // Generate random password
+    const newPassword = Math.random().toString(36).substring(2, 10);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    // Send the new password as an SMS using Twilio
+    const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    await twilioClient.messages.create({
+      body: `Your new password: ${newPassword}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phoneNumber,
+    });
+
+    return res.json({ status: true, message: 'Password sent via SMS' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // [POST] http://localhost:PORT/users/resetpassword/:token
 const resetPasswordHandler = createHandler(async (req, res, next) => {
   try {
@@ -158,6 +195,7 @@ export {
   updateUserHandler as Update,
   removeUserHandler as Delete,
   forgotPasswordHandler as ForgotPassword,
+  smsSenderHandler as SmsSender,
   resetPasswordHandler as ResetPassword,
   logoutHandler as LogOut,
 };
