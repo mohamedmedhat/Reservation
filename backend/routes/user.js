@@ -8,6 +8,8 @@ import {
   GetById,
   Update,
   Delete,
+  ResetPassword,
+  LogOut,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -46,5 +48,15 @@ router.delete("/delete/:id",  (req,res,next)=>{
   console.log("Received DELETE request [delete] from users/delete/:id");
   next();
 },Delete);
+
+router.post('/resetpassword/:token',(req,res,next)=>{
+  console.log("Received POST request [resetPassword] from users/resetpassword/:toekn");
+  next();
+},ResetPassword);
+
+router.post('/logout',(req,res,next)=>{
+  console.log("Received POST request [logout] from users/logout");
+  next();
+},LogOut)
 
 export default router;
