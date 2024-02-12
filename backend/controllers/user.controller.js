@@ -17,15 +17,15 @@ const sendResetPasswordEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "night.ofinfidels@gmail.com",
-      pass: "123",
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
   const encodedToken = encodeURIComponent(token).replace(/\./g, "%2E");
 
   const mailOptions = {
-    from: "night.ofinfidels@gmail.com",
+    from: process.env.EMAIL_USER,
     to: email,
     subject: `Reset ${email} password`,
     text: `http://localhost:5173/resetPassword/${encodedToken}`,
@@ -104,7 +104,7 @@ const removeUserHandler = createHandler(async (req, res) => {
 const forgotPasswordHandler = createHandler(async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await UserModel.findOne({ email });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.json({ msg: "User not found" });
@@ -125,7 +125,7 @@ const resetPasswordHandler = createHandler(async (req, res, next) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const userId = decoded.id;
 
     const hashedPassword = await bcrypt.hash(password, 10);
