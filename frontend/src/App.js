@@ -5,6 +5,9 @@ import SignIn from './pages/SignIn';
 import {Chat} from './pages/Chat';
 import './index.css';
 import  Navbar  from './components/Navbar/Navbar';
+import  ResetPassword  from './pages/ResetPassword';
+import ResetByEmail from './pages/ResetByEmail';
+import ResetBySMS from './pages/ResetBySMS';
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
       <Route path='/signup' exact element={<SignUp/>}/>
       <Route path='/signin' exact element={<SignIn/>}/>
       <Route path='/chat' exact element={<Chat/>}/>
+      <Route path='/resetpassword' exact element={<ResetPassword/>}/>
+      <Route path='/reset-passwordby-email' exact element={<ResetByEmail/>}/>
+      <Route path='/reset-passwordby-sms' exact element={<ResetBySMS/>}/>
      </Routes>
      </BrowserRouter>
     </div>
