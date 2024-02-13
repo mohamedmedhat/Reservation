@@ -18,6 +18,11 @@ export const links = [
         id:4,
         name:"Chat",
         url: "/chat"
+    },
+    {
+        id:5,
+        name:"pay",
+        url: "/payment"
     }
 ]
 

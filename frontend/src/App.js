@@ -8,6 +8,7 @@ import  Navbar  from './components/Navbar/Navbar';
 import  ResetPassword  from './pages/ResetPassword';
 import ResetByEmail from './pages/ResetByEmail';
 import ResetBySMS from './pages/ResetBySMS';
+import Payment from './pages/Payment';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path='/resetpassword' exact element={<ResetPassword/>}/>
       <Route path='/reset-passwordby-email' exact element={<ResetByEmail/>}/>
       <Route path='/reset-passwordby-sms' exact element={<ResetBySMS/>}/>
+      <Route path='/payment' exact element={<Payment/>}/>
      </Routes>
      </BrowserRouter>
     </div>
