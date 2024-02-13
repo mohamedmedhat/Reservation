@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 import { Server } from 'socket.io';
 import User from '../models/user.js';
+import redisClient from '../redisConfig.js';
 
 const generateAuthToken = (user) => {
   const payload = {
@@ -37,10 +38,30 @@ const sendResetPasswordEmail = async (email, token) => {
 };
 
 // Factory function for creating handlers
-const createHandler = (handler) => asyncHandler(handler);
+const createHandlerWithRedis = (handler) => asyncHandler( async (req,res)=>{
+  const cacheKey = req.originalUrl;
+    
+    // Check if data exists in Redis cache
+    redisClient.get(cacheKey, async (err, cachedData) => {
+        if (err) {
+            console.error('Redis Error:', err);
+            // If error, proceed without cache
+            return handler(req, res);
+        } else if (cachedData) {
+            // If data exists in cache, return cached data
+            return res.json(JSON.parse(cachedData));
+        } else {
+            // If data does not exist in cache, fetch from database
+            const data = await handler(req, res);
+            // Cache data in Redis
+            redisClient.setex(cacheKey, 3600, JSON.stringify(data)); // Cache for 1 hour
+            return res.json(data);
+        }
+    });
+});
 
 // [POST] http://localhost:PORT/users/reg
-const registerHandler = createHandler(async (req, res) => {
+const registerHandler = createHandlerWithRedis(async (req, res) => {
   const userData = req.body;
   const hashedPassword = await bcrypt.hash(userData.password, 10);
   const newUser = new User({ ...userData, password: hashedPassword });
@@ -49,7 +70,7 @@ const registerHandler = createHandler(async (req, res) => {
 });
 
 // [POST] http://localhost:PORT/users/login
-const loginHandler = createHandler(async (req, res) => {
+const loginHandler = createHandlerWithRedis(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -60,20 +81,20 @@ const loginHandler = createHandler(async (req, res) => {
 });
 
 // [POST] http://localhost:PORT/users/create
-const createNewUserHandler = createHandler(async (req, res) => {
+const createNewUserHandler = createHandlerWithRedis(async (req, res) => {
   const newUser = new User(req.body);
   const savedUser = await newUser.save();
   res.status(201).json(savedUser);
 });
 
 // [GET] http://localhost:PORT/users/getall
-const getAllUsersHandler = createHandler(async (req, res) => {
+const getAllUsersHandler = createHandlerWithRedis(async (req, res) => {
   const users = await User.find();
   res.json(users);
 });
 
 // [GET] http://localhost:PORT/users/getbyid/:id
-const getUserByIdHandler = createHandler(async (req, res) => {
+const getUserByIdHandler = createHandlerWithRedis(async (req, res) => {
   const userId = req.params.id;
   const user = await User.findById(userId);
   if (!user) {
@@ -83,7 +104,7 @@ const getUserByIdHandler = createHandler(async (req, res) => {
 });
 
 // [PUT] http://localhost:PORT/users/update/:id
-const updateUserHandler = createHandler(async (req, res) => {
+const updateUserHandler = createHandlerWithRedis(async (req, res) => {
   const userId = req.params.id;
   const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
   if (!updatedUser) {
@@ -93,7 +114,7 @@ const updateUserHandler = createHandler(async (req, res) => {
 });
 
 // [DELETE] http://localhost:PORT/users/delete/:id
-const removeUserHandler = createHandler(async (req, res) => {
+const removeUserHandler = createHandlerWithRedis(async (req, res) => {
   const userId = req.params.id;
   const deletedUser = await User.findByIdAndDelete(userId);
   if (!deletedUser) {
@@ -103,7 +124,7 @@ const removeUserHandler = createHandler(async (req, res) => {
 });
 
 //[POST] http://localhost:PORT/users/forgotpassword
-const forgotPasswordHandler = createHandler(async (req, res, next) => {
+const forgotPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -122,7 +143,7 @@ const forgotPasswordHandler = createHandler(async (req, res, next) => {
 })
 
 // [POST] http://localhost:PORT/users/forgotpasswordassms
-const smsSenderHandler = createHandler(async (req, res, next) => {
+const smsSenderHandler = createHandlerWithRedis(async (req, res, next) => {
   const { phoneNumber, email } = req.body;
   const user = await User.findOne({ email });
 
@@ -157,7 +178,7 @@ const smsSenderHandler = createHandler(async (req, res, next) => {
 });
 
 // [POST] http://localhost:PORT/users/resetpassword/:token
-const resetPasswordHandler = createHandler(async (req, res, next) => {
+const resetPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
@@ -176,7 +197,7 @@ const resetPasswordHandler = createHandler(async (req, res, next) => {
 
 
 // [POST] http://localhost:PORT/users/logout
-const logoutHandler = createHandler( async (req, res, next) => {
+const logoutHandler = createHandlerWithRedis( async (req, res, next) => {
   try {
     res.clearCookie("token");
     return res.json({ status: true, msg: "Logged out successfully" });
