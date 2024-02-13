@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
-import { Server } from 'socket.io';
 import User from '../models/user.js';
 import redisClient from '../redisConfig.js';
 
@@ -38,27 +37,34 @@ const sendResetPasswordEmail = async (email, token) => {
 };
 
 // Factory function for creating handlers
-const createHandlerWithRedis = (handler) => asyncHandler( async (req,res)=>{
+
+const createHandlerWithRedis = (handler) => async (req, res) => {
   const cacheKey = req.originalUrl;
-    
-    // Check if data exists in Redis cache
-    redisClient.get(cacheKey, async (err, cachedData) => {
-        if (err) {
-            console.error('Redis Error:', err);
-            // If error, proceed without cache
-            return handler(req, res);
-        } else if (cachedData) {
-            // If data exists in cache, return cached data
-            return res.json(JSON.parse(cachedData));
-        } else {
-            // If data does not exist in cache, fetch from database
-            const data = await handler(req, res);
-            // Cache data in Redis
-            redisClient.setex(cacheKey, 3600, JSON.stringify(data)); // Cache for 1 hour
-            return res.json(data);
-        }
-    });
-});
+
+  // Check if data exists in Redis cache
+  redisClient.get(cacheKey, (err, cachedData) => {
+    if (err) {
+      console.error('Redis Error:', err);
+      // If error, proceed without cache
+      return handler(req, res);
+    } else if (cachedData) {
+      // If data exists in cache, return cached data
+      return res.json(JSON.parse(cachedData));
+    } else {
+      // If data does not exist in cache, fetch from database
+      handler(req, res)
+        .then((data) => {
+          // Cache data in Redis
+          redisClient.setex(cacheKey, 3600, JSON.stringify(data)); // Cache for 1 hour
+          res.json(data);
+        })
+        .catch((error) => {
+          console.error('Error fetching data from database:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        });
+    }
+  });
+};
 
 // [POST] http://localhost:PORT/users/reg
 const registerHandler = createHandlerWithRedis(async (req, res) => {
