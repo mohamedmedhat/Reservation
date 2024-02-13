@@ -56,18 +56,18 @@ const SignIn = () => {
           {isLoading ? <Loading /> : "Sign In"}
         </button>
         <div>
-          Don't have account! <Link to='/signup'>SignUp now </Link>
+          Forget your password! <Link className='font-bold hover:text-blue-500' to='/resetpassword'>restPassword</Link>
         </div>
         <div className="mt-4 text-center">
-          <p>Or sign in with:</p>
-          <div className="flex justify-center mt-2">
-            <button className="mr-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center" onClick={handleGoogleSignIn}>
+          <p></p>
+          <div className="flex flex-col gap-3 justify-center mt-2">
+            <button className="mr-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg w-full flex " onClick={handleGoogleSignIn}>
               <FaGoogle className="mr-2" /> Sign in with Google
             </button>
-            <button className="mr-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center" onClick={handleFacebookSignIn}>
+            <button className="mr-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg w-full flex " onClick={handleFacebookSignIn}>
               <FaFacebook className="mr-2" /> Sign in with Facebook
             </button>
-            <button className="bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center" onClick={handleTwitterSignIn}>
+            <button className="bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg w-full flex" onClick={handleTwitterSignIn}>
               <FaTwitter className="mr-2" /> Sign in with Twitter
             </button>
           </div>
@@ -87,7 +87,7 @@ const renderInput = (name, placeholder, formData, handleChange, type = 'text') =
       onChange={handleChange} 
       autoFocus={name === 'email'} 
       required 
-      className='input-field' 
+      className='input-field w-full' 
     />
   );
 }

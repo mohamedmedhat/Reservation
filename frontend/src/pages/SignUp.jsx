@@ -96,7 +96,7 @@ const SignUp = () => {
           {isLoading ? <Loading /> : "Sign Up"}
         </button>
         <div>
-          You have an account? <Link to='/signin'>SignIn now</Link>
+          You have an account? <Link className='font-bold hover:text-blue-400' to='/signin'>signin</Link>
         </div>
       </form>
     </div>
@@ -113,7 +113,7 @@ const renderInput = (name, placeholder, formData, handleChange, type = 'text') =
       onChange={handleChange} 
       autoFocus={name === 'name'} 
       required 
-      className='input-field' 
+      className='input-field w-full' 
     />
   );
 }
