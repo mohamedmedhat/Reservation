@@ -8,6 +8,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
     lname: "",
+    phoneNumber:"",
     email: "",
     age: "",
     password: ""
@@ -87,6 +88,7 @@ const SignUp = () => {
         <h2 className="text-2xl font-semibold mb-4">Sign Up</h2>
         {renderInput('name', 'Name', formData, handleChange)}
         {renderInput('lname', 'Last Name', formData, handleChange)}
+        {renderInput('phoneNumber', 'Phone Number', formData, handleChange)}
         {renderInput('age', 'Age', formData, handleChange, 'number')}
         {renderInput('email', 'Email', formData, handleChange, 'email')}
         {renderInput('password', 'Password', formData, handleChange, 'password')}
