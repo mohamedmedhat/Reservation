@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import ProductRouter from "./routes/product.js";
 import UserRouter from "./routes/user.js";
 import dotenv from "dotenv";
@@ -32,7 +33,7 @@ app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
-
+app.use(compression());
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")))
