@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
+import stripe from 'stripe';
 import User from '../models/user.js';
 import redisClient from '../redisConfig.js';
 
@@ -201,6 +202,23 @@ const resetPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
   }
 });
 
+//[POST] http://localhost:PORT/users/payment
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripeInstance = stripe(stripeSecretKey);
+const paymentHandler = createHandlerWithRedis(async (req,res)=>{
+  try{
+    const paymentIntent = await stripeInstance.paymentIntents.create({
+      amount: req.body.amount,
+      currency: 'usd',
+      payment_method_types: req.body.payment_method_types,
+    });
+    res.json({ client_secret: paymentIntent.client_secret });
+  }
+  catch(error){
+    console.error('Error:', error);
+    res.status(500).send({ error: 'An error occurred while processing the payment' });
+  }
+})
 
 // [POST] http://localhost:PORT/users/logout
 const logoutHandler = createHandlerWithRedis( async (req, res, next) => {
@@ -224,5 +242,6 @@ export {
   forgotPasswordHandler as ForgotPassword,
   smsSenderHandler as SmsSender,
   resetPasswordHandler as ResetPassword,
+  paymentHandler as Payment,
   logoutHandler as LogOut,
 };

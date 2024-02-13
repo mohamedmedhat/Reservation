@@ -12,6 +12,7 @@ import {
   LogOut,
   ForgotPassword,
   SmsSender,
+  Payment,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -65,6 +66,11 @@ router.post('/resetpassword/:token',(req,res,next)=>{
   console.log("Received POST request [resetPassword] from users/resetpassword/:token");
   next();
 },ResetPassword);
+
+router.post('/payment',(req,res,next)=>{
+  console.log("Received POST request [payment] from users/payment");
+  next();
+},Payment)
 
 router.post('/logout',(req,res,next)=>{
   console.log("Received POST request [logout] from users/logout");
