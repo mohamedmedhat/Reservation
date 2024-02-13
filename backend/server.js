@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import compression from "compression";
+import helmet from "helmet";
 import ProductRouter from "./routes/product.js";
 import UserRouter from "./routes/user.js";
 import dotenv from "dotenv";
@@ -34,6 +35,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(compression());
+app.use(helmet());
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")))
