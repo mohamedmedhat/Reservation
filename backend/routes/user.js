@@ -14,6 +14,7 @@ import {
   SmsSender,
   Payment,
 } from "../controllers/user.controller.js";
+import { isAuthorized } from "../utilis.js";
 
 const router = express.Router();
 
@@ -27,27 +28,27 @@ router.post("/login", (req,res,next)=>{
   next();
 },LogIn);
 
-router.post("/create",  (req,res,next)=>{
+router.post("/create",(req,res,next)=>{
   console.log("Received POST request [create] from users/create");
   next();
 },Create);
 
-router.get("/getall",  (req,res,next)=>{
+router.get("/getall",(req,res,next)=>{
   console.log("Received GET request [getall] from users/getall");
   next();
 },GetAll);
 
-router.get("/getbyid/:id",  (req,res,next)=>{
+router.get("/getbyid/:id",(req,res,next)=>{
   console.log("Received GET request [getbyid] from users/getbyid/:id");
   next();
 },GetById);
 
-router.put("/update/:id",  (req,res,next)=>{
+router.put("/update/:id",(req,res,next)=>{
   console.log("Received PUT request [update] from users/update/:id");
   next();
 },Update);
 
-router.delete("/delete/:id",  (req,res,next)=>{
+router.delete("/delete/:id",  isAuthorized,(req,res,next)=>{
   console.log("Received DELETE request [delete] from users/delete/:id");
   next();
 },Delete);

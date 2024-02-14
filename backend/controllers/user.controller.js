@@ -12,6 +12,7 @@ const generateAuthToken = (user) => {
     _id: user._id,
     email: user.email,
     name: user.name,
+    isAdmin:user.isAdmin,
   };
   return jwt.sign(payload, process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
 };
@@ -39,36 +40,38 @@ const sendResetPasswordEmail = async (email, token) => {
 
 // Factory function for creating handlers
 
-const createHandlerWithRedis = (handler) => async (req, res) => {
-  const cacheKey = req.originalUrl;
+// const createHandler = (handler) => async (req, res) => {
+//   const cacheKey = req.originalUrl;
 
-  // Check if data exists in Redis cache
-  redisClient.get(cacheKey, (err, cachedData) => {
-    if (err) {
-      console.error('Redis Error:', err);
-      // If error, proceed without cache
-      return handler(req, res);
-    } else if (cachedData) {
-      // If data exists in cache, return cached data
-      return res.json(JSON.parse(cachedData));
-    } else {
-      // If data does not exist in cache, fetch from database
-      handler(req, res)
-        .then((data) => {
-          // Cache data in Redis
-          redisClient.setex(cacheKey, 3600, JSON.stringify(data)); // Cache for 1 hour
-          res.json(data);
-        })
-        .catch((error) => {
-          console.error('Error fetching data from database:', error);
-          res.status(500).json({ error: 'Internal server error' });
-        });
-    }
-  });
-};
+//   // Check if data exists in Redis cache
+//   redisClient.get(cacheKey, (err, cachedData) => {
+//     if (err) {
+//       console.error('Redis Error:', err);
+//       // If error, proceed without cache
+//       return handler(req, res);
+//     } else if (cachedData) {
+//       // If data exists in cache, return cached data
+//       return res.json(JSON.parse(cachedData));
+//     } else {
+//       // If data does not exist in cache, fetch from database
+//       handler(req, res)
+//         .then((data) => {
+//           // Cache data in Redis
+//           redisClient.setex(cacheKey, 3600, JSON.stringify(data)); // Cache for 1 hour
+//           res.json(data);
+//         })
+//         .catch((error) => {
+//           console.error('Error fetching data from database:', error);
+//           res.status(500).json({ error: 'Internal server error' });
+//         });
+//     }
+//   });
+// };
+
+const createHandler = (handler) => asyncHandler(handler)
 
 // [POST] http://localhost:PORT/users/reg
-const registerHandler = createHandlerWithRedis(async (req, res) => {
+const registerHandler = createHandler(async (req, res) => {
   const userData = req.body;
   const hashedPassword = await bcrypt.hash(userData.password, 10);
   const newUser = new User({ ...userData, password: hashedPassword });
@@ -77,7 +80,7 @@ const registerHandler = createHandlerWithRedis(async (req, res) => {
 });
 
 // [POST] http://localhost:PORT/users/login
-const loginHandler = createHandlerWithRedis(async (req, res) => {
+const loginHandler = createHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -88,20 +91,20 @@ const loginHandler = createHandlerWithRedis(async (req, res) => {
 });
 
 // [POST] http://localhost:PORT/users/create
-const createNewUserHandler = createHandlerWithRedis(async (req, res) => {
+const createNewUserHandler = createHandler(async (req, res) => {
   const newUser = new User(req.body);
   const savedUser = await newUser.save();
   res.status(201).json(savedUser);
 });
 
 // [GET] http://localhost:PORT/users/getall
-const getAllUsersHandler = createHandlerWithRedis(async (req, res) => {
+const getAllUsersHandler = createHandler(async (req, res) => {
   const users = await User.find();
   res.json(users);
 });
 
 // [GET] http://localhost:PORT/users/getbyid/:id
-const getUserByIdHandler = createHandlerWithRedis(async (req, res) => {
+const getUserByIdHandler = createHandler(async (req, res) => {
   const userId = req.params.id;
   const user = await User.findById(userId);
   if (!user) {
@@ -111,7 +114,7 @@ const getUserByIdHandler = createHandlerWithRedis(async (req, res) => {
 });
 
 // [PUT] http://localhost:PORT/users/update/:id
-const updateUserHandler = createHandlerWithRedis(async (req, res) => {
+const updateUserHandler = createHandler(async (req, res) => {
   const userId = req.params.id;
   const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
   if (!updatedUser) {
@@ -121,7 +124,7 @@ const updateUserHandler = createHandlerWithRedis(async (req, res) => {
 });
 
 // [DELETE] http://localhost:PORT/users/delete/:id
-const removeUserHandler = createHandlerWithRedis(async (req, res) => {
+const removeUserHandler = createHandler(async (req, res) => {
   const userId = req.params.id;
   const deletedUser = await User.findByIdAndDelete(userId);
   if (!deletedUser) {
@@ -131,7 +134,7 @@ const removeUserHandler = createHandlerWithRedis(async (req, res) => {
 });
 
 //[POST] http://localhost:PORT/users/forgotpassword
-const forgotPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
+const forgotPasswordHandler = createHandler(async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -140,7 +143,7 @@ const forgotPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
       return res.json({ msg: "User not found" });
     }
 
-    const token = generateToken({ id: user._id });
+    const token = generateAuthToken({ id: user._id }); // Corrected from generateToken to generateAuthToken
     await sendResetPasswordEmail(email, token);
 
     return res.json({ status: true, msg: "Reset password email sent" });
@@ -150,7 +153,7 @@ const forgotPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
 })
 
 // [POST] http://localhost:PORT/users/forgotpasswordassms
-const smsSenderHandler = createHandlerWithRedis(async (req, res, next) => {
+const smsSenderHandler = createHandler(async (req, res, next) => {
   const { phoneNumber, email } = req.body;
   const user = await User.findOne({ email });
 
@@ -185,7 +188,7 @@ const smsSenderHandler = createHandlerWithRedis(async (req, res, next) => {
 });
 
 // [POST] http://localhost:PORT/users/resetpassword/:token
-const resetPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
+const resetPasswordHandler = createHandler(async (req, res, next) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
@@ -194,9 +197,9 @@ const resetPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
     const userId = decoded.id;
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
+    await User.findByIdAndUpdate(userId, { password: hashedPassword }); // Changed UserModel to User
 
-    return res.json({ status: true, msg: "Password updated successfully" });
+    return res.json({ status: true, message: "Password updated successfully" }); // Changed msg to message
   } catch (error) {
     next(error);
   }
@@ -205,7 +208,7 @@ const resetPasswordHandler = createHandlerWithRedis(async (req, res, next) => {
 //[POST] http://localhost:PORT/users/payment
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripeInstance = stripe(stripeSecretKey);
-const paymentHandler = createHandlerWithRedis(async (req,res)=>{
+const paymentHandler = createHandler(async (req,res)=>{
   try{
     const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: req.body.amount,
@@ -221,7 +224,7 @@ const paymentHandler = createHandlerWithRedis(async (req,res)=>{
 })
 
 // [POST] http://localhost:PORT/users/logout
-const logoutHandler = createHandlerWithRedis( async (req, res, next) => {
+const logoutHandler = createHandler( async (req, res, next) => {
   try {
     res.clearCookie("token");
     return res.json({ status: true, msg: "Logged out successfully" });
