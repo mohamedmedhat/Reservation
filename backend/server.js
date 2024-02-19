@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { Server } from "socket.io";
 import ProductRouter from "./routes/product.js";
 import UserRouter from "./routes/user.js";
+import pdfRouter from "./routes/pdf.js";
 import dotenv from "dotenv";
 import mongoDb from "./config/connect.js";
 import path from "path";
@@ -84,6 +85,7 @@ app.get("/", express.static(path.join(__dirname, "../public")));
 app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
 app.use("/chats", ChatRouter);
+app.use("/pdfs",  pdfRouter);
 
 /** Swagger options */
 const options = {
