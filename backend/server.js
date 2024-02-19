@@ -85,16 +85,16 @@ app.get("/", express.static(path.join(__dirname, "../public")));
 app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
 app.use("/chats", ChatRouter);
-app.use("/pdfs",  pdfRouter);
+app.use("/pdfs", pdfRouter);
 
 /** Swagger options */
 const options = {
   definition: {
-    openapi: "3.1.0",
+    openapi: "3.0.0",
     info: {
       title: "Reservision [express]",
       version: "0.1.0",
-      description: "endpoints for booking a hotel",
+      description: "endpoints for booking service",
       licence: {
         name: "",
         url: "",
@@ -108,6 +108,7 @@ const options = {
     servers: [
       {
         url: "http://localhost:3001",
+        description: "local server",
       },
     ],
   },

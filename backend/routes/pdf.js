@@ -1,20 +1,25 @@
-import express from 'express';
-import { DownloadPdf, GeneratePdf } from '../controllers/pdf.controller';
+import express from "express";
+import { DownloadPdf, GeneratePdf } from "../controllers/pdf.controller.js";
+import logger from "../logger.js";
 
 const router = express.Router();
 
+router.get(
+  "/generate-pdf",
+  (req, res, next) => {
+    logger.info("Received GET request [generate-pdf]");
+    next();
+  },
+  GeneratePdf
+);
 
-router.get('/generate-pdf',(req,res,next)=>{
-  console.log("Received GET request [generate-pdf]");
-  next();
-},GeneratePdf);
-
-router.get('/download-pdf/:id',(req,res,next)=>{
-  console.log("Received GET request [download-pdf]");
-  next();
-},DownloadPdf)
-
-
-
+router.get(
+  "/download-pdf/:id",
+  (req, res, next) => {
+    logger.info("Received GET request [download-pdf]");
+    next();
+  },
+  DownloadPdf
+);
 
 export default router;

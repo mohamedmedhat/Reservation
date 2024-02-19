@@ -15,6 +15,7 @@ import {
   Payment,
 } from "../controllers/user.controller.js";
 import { isAuthorized } from "../utilis.js";
+import logger from "../logger.js";
 
 const router = express.Router();
 
@@ -73,15 +74,15 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/User'
  *     responses:
- *       201:
+ *       '201':
  *         description: User registered successfully
- *       400:
+ *       '400':
  *         description: Bad request, missing or invalid data
- *       500:
+ *       ''500'':
  *         description: Internal server error
  */
 router.post("/reg", (req,res,next)=>{
-  console.log("Received POST request to /users/reg");
+  logger.info("Received POST request to /users/reg");
   next();
 },Register);
 
@@ -104,15 +105,15 @@ router.post("/reg", (req,res,next)=>{
  *               password:
  *                 type: string
  *     responses:
- *       200:
+ *       '200':
  *         description: User logged in successfully
- *       401:
+ *       '401':
  *         description: Unauthorized, invalid email or password
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post("/login", (req,res,next)=>{
-  console.log("Received POST request [login] from users/login");
+  logger.info("Received POST request [login] from users/login");
   next();
 },LogIn);
 
@@ -135,11 +136,11 @@ router.post("/login", (req,res,next)=>{
  *         description: User created successfully
  *       400:
  *         description: Bad request, missing or invalid data
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post("/create",(req,res,next)=>{
-  console.log("Received POST request [create] from users/create");
+  logger.info("Received POST request [create] from users/create");
   next();
 },Create);
 
@@ -152,20 +153,20 @@ router.post("/create",(req,res,next)=>{
  *     description: Retrieve a list of all users
  *     tags: [Users]
  *     responses:
- *       200:
+ *       '200':
  *         description: List of users retrieved successfully
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.get("/getall",(req,res,next)=>{
-  console.log("Received GET request [getall] from users/getall");
+  logger.info("Received GET request [getall] from users/getall");
   next();
 },GetAll);
 
 
 /**
  * @swagger
- * /users/getbyid/{id}:
+ * /users/getbyid/:id:
  *   get:
  *     summary: Get user by ID
  *     description: Retrieve user details by providing user ID
@@ -173,22 +174,22 @@ router.get("/getall",(req,res,next)=>{
  *     parameters:
  *       - $ref: '#/components/parameters/userIdParam'
  *     responses:
- *       200:
+ *       '200':
  *         description: User details retrieved successfully
  *       404:
  *         description: User not found
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.get("/getbyid/:id",(req,res,next)=>{
-  console.log("Received GET request [getbyid] from users/getbyid/:id");
+  logger.info("Received GET request [getbyid] from users/getbyid/:id");
   next();
 },GetById);
 
 
 /**
  * @swagger
- * /users/update/{id}:
+ * /users/update/:id:
  *   put:
  *     summary: Update user details
  *     description: Update user details by providing user ID
@@ -202,22 +203,22 @@ router.get("/getbyid/:id",(req,res,next)=>{
  *           schema:
  *             $ref: '#/components/schemas/User'
  *     responses:
- *       200:
+ *       '200':
  *         description: User details updated successfully
  *       404:
  *         description: User not found
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.put("/update/:id",(req,res,next)=>{
-  console.log("Received PUT request [update] from users/update/:id");
+  logger.info("Received PUT request [update] from users/update/:id");
   next();
 },Update);
 
 
 /**
  * @swagger
- * /users/delete/{id}:
+ * /users/delete/:id:
  *   delete:
  *     summary: Delete user
  *     description: Delete a user by providing user ID
@@ -227,17 +228,17 @@ router.put("/update/:id",(req,res,next)=>{
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
+ *       '200':
  *         description: User deleted successfully
- *       401:
+ *       '401':
  *         description: Unauthorized, user not authenticated
  *       404:
  *         description: User not found
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.delete("/delete/:id",  isAuthorized,(req,res,next)=>{
-  console.log("Received DELETE request [delete] from users/delete/:id");
+  logger.info("Received DELETE request [delete] from users/delete/:id");
   next();
 },Delete);
 
@@ -259,15 +260,15 @@ router.delete("/delete/:id",  isAuthorized,(req,res,next)=>{
  *               email:
  *                 type: string
  *     responses:
- *       200:
+ *       '200':
  *         description: Password reset email sent successfully
  *       404:
  *         description: User not found
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post('/forgotpassword', (req,res,next)=>{
-  console.log("Received POST request [forgotpassword] from users/forgotpassword");
+  logger.info("Received POST request [forgotpassword] from users/forgotpassword");
   next();
 },ForgotPassword);
 
@@ -291,24 +292,24 @@ router.post('/forgotpassword', (req,res,next)=>{
  *               email:
  *                 type: string
  *     responses:
- *       200:
+ *       '200':
  *         description: New password sent via SMS successfully
  *       400:
  *         description: Provided phone number does not match the user record
  *       404:
  *         description: User not found
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post('/forgotpasswordassms',(req,res,next)=>{
-  console.log("Received POST request [forgotpasswordassms] from users/forgotpasswordassms");
+  logger.info("Received POST request [forgotpasswordassms] from users/forgotpasswordassms");
   next();
 },SmsSender)
 
 
 /**
  * @swagger
- * /users/resetpassword/{token}:
+ * /users/resetpassword/:token:
  *   post:
  *     summary: Reset password
  *     description: Reset user password using the provided token
@@ -330,15 +331,15 @@ router.post('/forgotpasswordassms',(req,res,next)=>{
  *               password:
  *                 type: string
  *     responses:
- *       200:
+ *       '200':
  *         description: Password reset successfully
  *       400:
  *         description: Invalid token or missing password
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post('/resetpassword/:token',(req,res,next)=>{
-  console.log("Received POST request [resetPassword] from users/resetpassword/:token");
+  logger.info("Received POST request [resetPassword] from users/resetpassword/:token");
   next();
 },ResetPassword);
 
@@ -364,13 +365,13 @@ router.post('/resetpassword/:token',(req,res,next)=>{
  *                 items:
  *                   type: string
  *     responses:
- *       200:
+ *       '200':
  *         description: Payment processed successfully
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post('/payment',(req,res,next)=>{
-  console.log("Received POST request [payment] from users/payment");
+  logger.info("Received POST request [payment] from users/payment");
   next();
 },Payment)
 
@@ -385,15 +386,15 @@ router.post('/payment',(req,res,next)=>{
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
+ *       '200':
  *         description: User logged out successfully
- *       401:
+ *       '401':
  *         description: Unauthorized, user not authorized to perform this action
- *       500:
+ *       '500':
  *         description: Internal server error
  */
 router.post('/logout',(req,res,next)=>{
-  console.log("Received POST request [logout] from users/logout");
+  logger.info("Received POST request [logout] from users/logout");
   next();
 },LogOut)
 
