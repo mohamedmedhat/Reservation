@@ -7,8 +7,8 @@ import {
   Update,
   uploadImage,
 } from "../controllers/product.controller.js";
-import { isAuthorized } from "../utilis.js";
-import logger from "../logger.js";
+import { isAuthorized } from "../utils/utilis.js";
+import logger from "../utils/logger.js";
 
 const router = express.Router();
 
