@@ -12,10 +12,26 @@ import path from "path";
 import http from "http";
 import { ChatRouter } from "./routes/chat.js";
 import Chat from "./models/message.js";
+import cluster from "cluster";
+import os from 'os';
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
 dotenv.config();
+
+if(cluster.isMaster){
+  const numberCpu = os.cpus().length;
+
+  for(let i=0; i< numberCpu; i++){
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker,code,signal)=>{
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork();
+  });
+}
+else{
 
 const app = express();
 const server = http.createServer(app);
@@ -131,4 +147,5 @@ try {
   });
 } catch (err) {
   console.error("Failed to connect to database");
+}
 }
