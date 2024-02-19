@@ -17,6 +17,7 @@ import os from 'os';
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
+
 dotenv.config();
 
 if(cluster.isMaster){
@@ -97,6 +98,7 @@ app.use(helmet());
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")));
 
+
 /** routes */
 app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
@@ -149,3 +151,4 @@ try {
   console.error("Failed to connect to database");
 }
 }
+
