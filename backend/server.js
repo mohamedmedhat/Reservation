@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import ProductRouter from "./routes/product.js";
 import UserRouter from "./routes/user.js";
 import pdfRouter from "./routes/pdf.js";
+import rabbitMQRouter from "./routes/rabbitMQmessage.js";
 import dotenv from "dotenv";
 import mongoDb from "./config/connect.js";
 import path from "path";
@@ -118,6 +119,7 @@ app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
 app.use("/chats", ChatRouter);
 app.use("/pdfs", pdfRouter);
+app.use("/rabbitmq",rabbitMQRouter);
 
 /** Swagger options */
 const options = {
