@@ -6,6 +6,7 @@ import twilio from 'twilio';
 import stripe from 'stripe';
 import User from '../models/user.js';
 import redisClient from '../redisConfig.js';
+import { validationResult } from 'express-validator';
 
 const generateAuthToken = (user) => {
   const payload = {
@@ -37,6 +38,13 @@ const sendResetPasswordEmail = async (email, token) => {
 
   await transporter.sendMail(mailOptions);
 };
+
+const ValidateErrors = async(req,res)=>{
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(400).json({errors: errors.array()});
+  }
+}
 
 // Factory function for creating handlers
 
@@ -74,6 +82,7 @@ const createHandler = (handler) => asyncHandler(handler)
 const registerHandler = createHandler(async (req, res) => {
   const userData = req.body;
   const hashedPassword = await bcrypt.hash(userData.password, 10);
+  ValidateErrors(userData,res);
   const newUser = new User({ ...userData, password: hashedPassword });
   const savedUser = await newUser.save();
   res.status(201).json(savedUser);
@@ -82,6 +91,7 @@ const registerHandler = createHandler(async (req, res) => {
 // [POST] http://localhost:PORT/users/login
 const loginHandler = createHandler(async (req, res) => {
   const { email, password } = req.body;
+  ValidateErrors(req.body,res);
   const user = await User.findOne({ email });
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(401).json({ message: 'Invalid email or password' });
@@ -92,6 +102,7 @@ const loginHandler = createHandler(async (req, res) => {
 
 // [POST] http://localhost:PORT/users/create
 const createNewUserHandler = createHandler(async (req, res) => {
+  ValidateErrors(req.body,res);
   const newUser = new User(req.body);
   const savedUser = await newUser.save();
   res.status(201).json(savedUser);
@@ -116,6 +127,7 @@ const getUserByIdHandler = createHandler(async (req, res) => {
 // [PUT] http://localhost:PORT/users/update/:id
 const updateUserHandler = createHandler(async (req, res) => {
   const userId = req.params.id;
+  ValidateErrors(req.body,res);
   const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
   if (!updatedUser) {
     return res.status(404).json({ message: 'User not found' });
@@ -137,6 +149,7 @@ const removeUserHandler = createHandler(async (req, res) => {
 const forgotPasswordHandler = createHandler(async (req, res, next) => {
   try {
     const { email } = req.body;
+    ValidateErrors(req.body,res);
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -155,6 +168,7 @@ const forgotPasswordHandler = createHandler(async (req, res, next) => {
 // [POST] http://localhost:PORT/users/forgotpasswordassms
 const smsSenderHandler = createHandler(async (req, res, next) => {
   const { phoneNumber, email } = req.body;
+  ValidateErrors(req.body,res);
   const user = await User.findOne({ email });
 
   if (!user) {
