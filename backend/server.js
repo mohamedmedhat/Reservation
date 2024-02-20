@@ -14,6 +14,7 @@ import { ChatRouter } from "./routes/chat.js";
 import Chat from "./models/message.js";
 import cluster from "cluster";
 import os from 'os';
+import rateLimit from "express-rate-limit";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -83,6 +84,13 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something went wrong!");
 });
 
+// Apply rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 150,
+  message: 'Too many requests from this IP, please try again later',
+})
+
 /** middlewares */
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -94,6 +102,7 @@ app.use(
 );
 app.use(compression());
 app.use(helmet());
+app.use(limiter);
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")));
