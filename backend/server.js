@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import compression from "compression";
 import helmet from "helmet";
 import { Server } from "socket.io";
@@ -100,12 +101,16 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 app.use(compression());
 app.use(helmet());
 app.use(limiter);
 
+
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.get("/", express.static(path.join(__dirname, "../public")));
+
+
 
 
 /** routes */
@@ -159,5 +164,6 @@ try {
 } catch (err) {
   console.error("Failed to connect to database");
 }
+
 }
 
