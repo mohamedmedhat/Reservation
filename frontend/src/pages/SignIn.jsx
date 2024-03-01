@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { FaGoogle, FaFacebook, FaTwitter } from 'react-icons/fa'; // Import icons from Font Awesome
 import { Loading } from '../elements/Loading/Loading';
@@ -12,6 +12,8 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -23,11 +25,16 @@ const SignIn = () => {
     setError("");
 
     try {
-      await axios.post("http://localhost:3001/users/login", formData);
+      const response = await axios.post("http://localhost:3001/users/login", formData);
       console.log("Login Successful");
+      navigate('/')
     } catch (err) {
       console.error(`There is an error: ${err}`);
+    if (err.response && err.response.status === 401) {
+      setError("Invalid email or password. Please try again.");
+    } else {
       setError("An error occurred. Please try again later.");
+    }
     } finally {
       setIsLoading(false);
     }

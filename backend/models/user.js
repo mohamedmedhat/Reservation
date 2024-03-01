@@ -3,31 +3,31 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     lastname: {
         type: String,
-        required: true
+        required: true,
     },
     phoneNumber:{
         type:Number,
-        required:true
+        required:true,
     },
     age: {
         type: Number,
-        required: true
+        required: true,
     },
     email: {
         type: String,
-        required: true
+        required: true,
     },
     password: {
         type: String, 
-        required: true
+        required: true,
     },
     isAdmin: {
         type: Boolean,
-        required: true,
+        required: false,
         default:false, 
       },
 }, { timestamps: true }); 

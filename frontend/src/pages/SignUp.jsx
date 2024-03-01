@@ -3,26 +3,29 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Loading } from '../elements/Loading/Loading';
 import { Link } from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import { updateFormData } from '../redux/slices/FormDataSlice';
+import { setLoading } from '../redux/slices/LoadingSlice';
+import { setError } from '../redux/slices/errorSlice';
+import { setPasswordStrength } from '../redux/slices/passwordStrengthSlice';
 
 const SignUp = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    lname: "",
-    phoneNumber:"",
-    email: "",
-    age: "",
-    password: ""
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState(null);
+  // dispatch
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // selectors
+  const formData = useSelector(state => state.formData)
+  const isLoading = useSelector(state => state.Loading);
+  const error = useSelector(state => state.error);
+  const passwordStrength = useSelector(state => state.passwordStrength)
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    dispatch(updateFormData({[name]: value}));
     if (name === 'password') {
-      setPasswordStrength(checkPasswordStrength(value));
+      dispatch(setPasswordStrength(checkPasswordStrength(value)));
     }
   }
 
@@ -65,8 +68,8 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    dispatch(setLoading(true));
+    dispatch(setError(""));
 
     try {
       const res = await axios.post("http://localhost:3001/users/reg", formData);
@@ -76,9 +79,9 @@ const SignUp = () => {
       }
     } catch (err) {
       console.error(`There is an error: ${err}`);
-      setError("An error occurred. Please try again later.");
+      dispatch(setError("An error occurred. Please try again later."));
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   }
 
@@ -87,7 +90,7 @@ const SignUp = () => {
       <form onSubmit={handleSubmit} className='w-full max-w-md bg-white rounded-lg shadow-md p-8'>
         <h2 className="text-2xl font-semibold mb-4">Sign Up</h2>
         {renderInput('name', 'Name', formData, handleChange)}
-        {renderInput('lname', 'Last Name', formData, handleChange)}
+        {renderInput('lastname', 'Last Name', formData, handleChange)}
         {renderInput('phoneNumber', 'Phone Number', formData, handleChange)}
         {renderInput('age', 'Age', formData, handleChange, 'number')}
         {renderInput('email', 'Email', formData, handleChange, 'email')}

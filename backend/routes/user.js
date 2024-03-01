@@ -29,7 +29,6 @@ router.post(
     body("age").isNumeric(),
     body("email").isEmail().withMessage("Not a valid e-mail address"),
     body("password").isLength({ min: 5 }).withMessage("need more characters"),
-    body("isAdmin").isBoolean(),
   ],
   (req, res, next) => {
     logger.info("Received POST request to /users/reg");
